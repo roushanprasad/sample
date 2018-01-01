@@ -1,0 +1,55 @@
+*********** To start Zookeeper *****************
+GoTo: D:\Program Files\zookeeper-3.4.11\bin
+and run zkServer.cmd
+
+########################## IMPORTANT KAFKA COMMANDS ######################
+To start KafkaL:
+.\bin\windows\kafka-server-start.bat .\config\server.properties
+
+Create KAFKA TOPIC: 
+kafka-topics.bat --create --zookeeper localhost:2181 --replication-factor 1 --
+
+partitions 1 --topic test
+
+Create KAFKA PRODUCER:
+kafka-console-producer.bat --broker-list localhost:9092 --topic test
+
+Create KAFKA CONSUMER: 
+kafka-console-consumer.bat --zookeeper localhost:2181 --topic test
+
+Kafka-producer-perf-test Batch (Inbuilt Producer to producer messages):
+kafka-producer-perf-test.bat --topic TestTopic --num-records 10000 --throughput 
+
+100 --record-size 1 --producer-props bootstrap.servers=localhost:9092 
+
+key.serializer=org.apache.kafka.common.serialization.StringSerializer 
+
+value.serializer=org.apache.kafka.common.serialization.StringSerializer
+
+##########################################################################
+
+================ Other Useful Commands ===========
+List Topics: 
+kafka-topics.bat --list --zookeeper localhost:2181
+
+Describe Topic: 
+kafka-topics.bat --describe --zookeeper localhost:2181 --topic [Topic Name]
+
+Read messages from beginning: 
+kafka-console-consumer.bat --zookeeper localhost:2181 --topic [Topic Name] --
+
+from-beginning
+
+Delete Topic: 
+kafka-run-class.bat kafka.admin.TopicCommand --delete --topic [topic_to_delete] 
+
+--zookeeper localhost:2181
+
+Alter a Topic (Add a Partition):
+kafka-topics.bat --zookeeper localhost:2181 --alter --topic TestTopic2 --
+
+partitions 2
+
+=================================================================================
+
+=======
