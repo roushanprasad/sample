@@ -1,0 +1,111 @@
+----------------------- KafkaSender Service --------------------
+package com.main.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Service;
+
+@Service
+public class KafkaSender {
+	
+	@Autowired
+	private KafkaTemplate<String, String> kafkaTemplate;
+	String kafkaTopic = "TestTopic";
+	
+	public void send(String message){
+		kafkaTemplate.send(kafkaTopic, message);
+	}
+
+}
+
+---------------------- Kafka Web Controller -------------------------
+package com.main.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.main.service.KafkaSender;
+
+@RestController
+@RequestMapping(value="/spring-kafka")
+public class KafkaWebController {
+	
+	@Autowired
+	KafkaSender kafkaSender;
+	
+	@GetMapping(value="/producer")
+	public String producer(@RequestParam("message") String message){
+		kafkaSender.send(message);
+		return "Message sent to Kafka topic TestTopic";
+	}
+
+}
+
+--------------------- SpringBootMainClass -----------------
+package com.main;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class SpringBootMainClass {
+
+	public static void main(String[] args) {
+		SpringApplication.run(new Object[]{SpringBootMainClass.class}, args);
+	}
+
+}
+
+---------------------------- pom.xml -------------------
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.code</groupId>
+	<artifactId>springboot</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<packaging>jar</packaging>
+
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>1.5.3.RELEASE</version>
+		<relativePath />
+	</parent>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.kafka</groupId>
+			<artifactId>spring-kafka</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+</project>
+
