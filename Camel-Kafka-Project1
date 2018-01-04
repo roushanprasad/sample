@@ -1,0 +1,203 @@
+------------------------------ pom.xml ---------------------------
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.abn</groupId>
+	<artifactId>camel-kafka</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-core</artifactId>
+			<version>2.13.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-kafka</artifactId>
+			<version>2.16.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.scala-lang</groupId>
+			<artifactId>scala-library</artifactId>
+			<version>2.11.0</version>
+		</dependency>
+	</dependencies>
+</project>
+
+--------------------- Kafka Configurer -------------------------
+package com.main.config;
+
+import com.main.utils.PropertiesLoader;
+
+public class KafkaConfigurer {
+	//Kafka Server Details for Camel
+	private static String topicName;
+	private static String kafkaServer;
+	private static String zooKeeperHost;
+	private static String serializerClass;
+	
+	//Kafka Server End point Url for Camel (Sending to Kafka URL)
+	private static String toKafkaURL;
+	
+	static{
+		topicName = "topic="+PropertiesLoader.getPropertyValue("topic");
+		kafkaServer = "kafka:"+PropertiesLoader.getPropertyValue("kafkaServer1");
+		zooKeeperHost = "zookeeperHost="+PropertiesLoader.getPropertyValue("zookeeperHost")+
+				"&zookeeperPort="+PropertiesLoader.getPropertyValue("zookeeperPort");
+		serializerClass = "serializerClass="+PropertiesLoader.getPropertyValue("serializerClass");
+		
+		//toKafka URL
+		toKafkaURL = kafkaServer+"?"+topicName+"&"+zooKeeperHost+"&"+serializerClass;
+		
+	}
+
+	public static String getToKafkaURL() {
+		return toKafkaURL;
+	}
+
+	public static String getTopicName() {
+		return topicName;
+	}
+
+	public static String getKafkaServer() {
+		return kafkaServer;
+	}
+
+	public static String getZooKeeperHost() {
+		return zooKeeperHost;
+	}
+
+	public static String getSerializerClass() {
+		return serializerClass;
+	}
+
+}
+
+--------------------------------- CamelKafkaMainApp ----------------------------------
+package com.main.core;
+
+import org.apache.camel.CamelContext;
+import org.apache.camel.impl.DefaultCamelContext;
+
+
+public class CamelKafkaMainApp {
+
+	public static void main(String[] args) {
+		
+		SampleRouteBuilder routeBuilder = new SampleRouteBuilder();
+		CamelContext ctx = new DefaultCamelContext();
+		
+		try {
+			ctx.addRoutes(routeBuilder);
+			ctx.start();
+			Thread.sleep(8000);
+			ctx.stop();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+}
+
+--------------------------------- Sample -----------------------
+package com.main.core;
+
+
+public class Sample {/*
+
+	public static void main(String[] args) {
+		System.out.println(PropertiesLoader.getPropertyValue("topic"));
+		System.out.println(PropertiesLoader.getPropertyValue("message"));
+		System.out.println(PropertiesLoader.getPropertyValue("server"));
+		
+		SampleRouteBuilder sb = new SampleRouteBuilder();
+		try {
+			sb.configure();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+*/
+}
+
+---------------------- SampleRouteBuilder ----------------------------
+package com.main.core;
+
+import org.apache.camel.builder.RouteBuilder;
+
+import com.main.config.KafkaConfigurer;
+
+public class SampleRouteBuilder extends RouteBuilder {
+
+	@Override
+	public void configure() throws Exception {
+		
+		System.out.println(KafkaConfigurer.getTopicName());
+		System.out.println(KafkaConfigurer.getKafkaServer());
+		System.out.println(KafkaConfigurer.getZooKeeperHost());
+		System.out.println(KafkaConfigurer.getSerializerClass());
+		System.out.println(KafkaConfigurer.getToKafkaURL());
+		
+		from("file:D:/New folder?noop=true").split().tokenize("\n").
+		to(KafkaConfigurer.getToKafkaURL());
+	}
+
+}
+
+--------------------------- Properties Loader ----------------------------------
+package com.main.utils;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Properties;
+
+public class PropertiesLoader {
+
+	private static Properties prop;
+
+	static {
+		try {
+			prop = new Properties();
+			// Loading a properties file from classpath
+			prop.load(PropertiesApp.class.getClassLoader().getResourceAsStream(
+					"config.properties"));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static String getPropertyValue(String key) {
+		return prop.getProperty(key);
+	}
+}
+
+-------------------------- PropertiesApp -------------------------
+package com.main.utils;
+
+
+public class PropertiesApp {
+
+	public static void main(String[] args) {
+		
+		//new PropertiesLoader();
+		
+		System.out.println(PropertiesLoader.getPropertyValue("topic"));
+		System.out.println(PropertiesLoader.getPropertyValue("message"));
+		System.out.println(PropertiesLoader.getPropertyValue("server"));
+	}
+}
+
+
+---------------- config.properties -----------------------
+topic=TestTopic
+kafkaServer1=localhost:9092
+kafkaServer2=localhost:9093
+zookeeperHost=localhost
+zookeeperPort=2181
+serializerClass=kafka.serializer.StringEncoder
+
