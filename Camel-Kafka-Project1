@@ -22,9 +22,13 @@
 			<artifactId>scala-library</artifactId>
 			<version>2.11.0</version>
 		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
+		</dependency>
 	</dependencies>
 </project>
-
 --------------------- Kafka Configurer -------------------------
 package com.main.config;
 
@@ -79,12 +83,16 @@ package com.main.core;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.impl.DefaultCamelContext;
+import org.apache.log4j.Logger;
 
 
 public class CamelKafkaMainApp {
 
+	final static Logger logger = Logger.getLogger(CamelKafkaMainApp.class);
+	
 	public static void main(String[] args) {
 		
+		logger.debug("CamelKafkaMainApp.main(): Starts");
 		SampleRouteBuilder routeBuilder = new SampleRouteBuilder();
 		CamelContext ctx = new DefaultCamelContext();
 		
@@ -97,10 +105,11 @@ public class CamelKafkaMainApp {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+		logger.debug("CamelKafkaMainApp.main(): Ends");
 	}
 
 }
+
 
 --------------------------------- Sample -----------------------
 package com.main.core;
@@ -201,3 +210,20 @@ zookeeperHost=localhost
 zookeeperPort=2181
 serializerClass=kafka.serializer.StringEncoder
 
+------------------------------- log4j.properties--------------
+# Root logger option
+log4j.rootLogger=DEBUG, stdout, file
+
+# Redirect log messages to console
+log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.Target=System.out
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+log4j.appender.stdout.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
+
+# Redirect log messages to a log file, support file rolling.
+log4j.appender.file=org.apache.log4j.RollingFileAppender
+log4j.appender.file.File=D:\\Workspaces\\Camel-Kafka\\camel-kafka\\logs\\Kafka.logs
+log4j.appender.file.MaxFileSize=10MB
+log4j.appender.file.MaxBackupIndex=10
+log4j.appender.file.layout=org.apache.log4j.PatternLayout
+log4j.appender.file.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
