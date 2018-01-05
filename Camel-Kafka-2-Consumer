@@ -1,0 +1,90 @@
+All the things are same as that of the producer (Camel-Kafka-1) project. Just few changes in Route Builder class and the main class.
+In route builder we add KafkaEndPoint and in main class we add the infinite loop so that the program doesnot end before connection time out.
+The same can be done with threads i guess (check if possible).
+
+----------------------------- SampleRouteBuilder-----------------------
+package com.main.core;
+
+import org.apache.camel.Exchange;
+import org.apache.camel.Message;
+import org.apache.camel.Processor;
+import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.model.language.SimpleExpression;
+import org.apache.log4j.Logger;
+
+import com.main.config.KafkaConfigurer;
+
+public class SampleRouteBuilder extends RouteBuilder {
+	final static Logger logger = Logger.getLogger(CamelKafkaMainApp.class);
+
+	@Override
+	public void configure() throws Exception {
+		
+		System.out.println(KafkaConfigurer.getTopicName());
+		System.out.println(KafkaConfigurer.getKafkaServer());
+		System.out.println(KafkaConfigurer.getZooKeeperHost());
+		System.out.println(KafkaConfigurer.getSerializerClass());
+		System.out.println(KafkaConfigurer.getToKafkaURL());
+		
+		//File to kafka Topic
+		logger.debug("************************************** STARTED **************************");
+//		from("file:D:/New folder?noop=true").split().tokenize("\n").
+//		to(KafkaConfigurer.getToKafkaURL());
+		logger.debug("**************************************** ENDS *******************************");
+		
+		//Kafka Topic to Console
+				
+		logger.debug("************************************** STARTED **************************");
+		from("kafka:TestTopic?brokers=localhost:9092"
+				+ "&serializerClass=kafka.serializer.StringEncoder&autoOffsetReset=earliest&seekTo=beginning"
+				+ "&groupId=test").process(new Processor() {
+					
+					public void process(Exchange exchange) throws Exception {
+						if (exchange.getIn() != null) {
+						    Message message = exchange.getIn();
+						    String data = message.getBody(String.class);
+						    logger.debug("Data is =" + data.toString());
+						}else{
+							logger.debug("Couldnt get message from Kafka Server");
+						}
+					}
+				});
+		logger.debug("**************************************** ENDS *******************************");
+	}
+
+}
+
+
+--------------------------- CamelKafkaMainApp -------------------------------------------------------
+package com.main.core;
+
+import org.apache.camel.CamelContext;
+import org.apache.camel.impl.DefaultCamelContext;
+import org.apache.log4j.Logger;
+
+
+public class CamelKafkaMainApp {
+
+	final static Logger logger = Logger.getLogger(CamelKafkaMainApp.class);
+	
+	public static void main(String[] args) {
+		
+		logger.debug("CamelKafkaMainApp.main(): Starts");
+		SampleRouteBuilder routeBuilder = new SampleRouteBuilder();
+		CamelContext ctx = new DefaultCamelContext();
+		
+		try {
+			ctx.addRoutes(routeBuilder);
+			ctx.start();
+			while(true){
+				
+			}
+			//ctx.stop();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.debug("CamelKafkaMainApp.main(): Ends");
+	}
+
+}
