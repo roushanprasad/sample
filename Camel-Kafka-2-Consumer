@@ -1,6 +1,6 @@
 All the things are same as that of the producer (Camel-Kafka-1) project. Just few changes in Route Builder class and the main class.
 In route builder we add KafkaEndPoint and in main class we add the infinite loop so that the program doesnot end before connection time out.
-The same can be done with threads i guess (check if possible).
+The same can be done with threads i guess (check if possible) and we change the Camel-version. Actually the older camel version was causing issues
 
 ----------------------------- SampleRouteBuilder-----------------------
 package com.main.core;
@@ -85,6 +85,38 @@ public class CamelKafkaMainApp {
 			e.printStackTrace();
 		}
 		logger.debug("CamelKafkaMainApp.main(): Ends");
+		
+		------------------------------- pom.xml--------------------------
+		<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.abn</groupId>
+	<artifactId>camel-kafka</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-core</artifactId>
+			<version>2.20.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-kafka</artifactId>
+			<version>2.20.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.scala-lang</groupId>
+			<artifactId>scala-library</artifactId>
+			<version>2.11.0</version>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
+		</dependency>
+	</dependencies>
+</project>
 	}
 
 }
